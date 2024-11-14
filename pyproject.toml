@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "game"
+version = "0.1.0"
+description = ""
+authors = ["gustavodsantos <gustavojuniordos@hotmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1.3"
+python-decouple = "^3.8"
+dj-database-url = "^2.3.0"
+psycopg2 = "^2.9.10"
+django-min-custom-user = "^0.2.0"
+django-storages = { extras = ["s3"], version = "^1.14.4" }
+pillow = "^11.0.0"
+devpro-s3-storages = "^0.2.0"
+django-extensions = "^3.2.3"
+ipython = "^8.29.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+pytest-django = "^4.9.0"
+pytest-cov = "^6.0.0"
+ruff = "^0.7.3"
+taskipy = "^1.14.0"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "mysite.settings"
+python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
+
+[tool.ruff]
+line-length=120
+exclude = ['./mysite/base/migrations']
+
+[tool.ruff.lint]
+select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+ignore = ["PLR2004"]
+
+[tool.ruff.format]
+quote-style = 'single'
+
+[tool.taskipy.tasks]
+lint = 'ruff check . && ruff check . --diff'
+format = 'ruff check . --fix && ruff format .'
+run = 'python manage.py runserver'
+
+pre_test = 'task lint'
+test = 'pytest mysite/ -s -x --cov=mysite -vv'
+post_test = 'coverage html'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
