@@ -63,7 +63,7 @@ def perguntas(request, indice: int):
                     try:
                         Resposta.objects.create(aluno_id=aluno_id, pergunta=pergunta, pontos=pontos)
                     except IntegrityError:
-                        messages.error(request, 'Resposta já existe para este aluno e pergunta.')
+                        messages.error(request, 'Resposta já respondida por este aluno. Voltar ao Login.')
                         return redirect(f'/perguntas/{indice}')
 
                     return redirect(f'/perguntas/{indice + 1}')

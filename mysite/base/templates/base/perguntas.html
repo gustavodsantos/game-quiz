@@ -29,8 +29,9 @@
                     <div class="choice-container">
                         <ul class="messages">
                             {% for message in messages %}
-                                <li class="{{ message.tags }}">{{ message }}</li>
+                                <li><a href="/" >{{ message }}</a></li>
                             {% endfor %}
+                            
                         </ul>
                     </div>
                 {% endif %}
