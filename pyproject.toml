@@ -39,7 +39,7 @@ exclude = ['./mysite/base/migrations']
 
 [tool.ruff.lint]
 select = ['I', 'F', 'E', 'W', 'PL', 'PT']
-ignore = ["PLR2004", "PLW0127", "PLW0128"]
+ignore = ["PLR2004"]
 
 [tool.ruff.format]
 quote-style = 'single'
