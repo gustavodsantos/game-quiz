@@ -1,7 +1,7 @@
+from django.contrib import messages
+from django.db import IntegrityError
 from django.db.models import Sum
 from django.shortcuts import redirect, render
-
-# Create your views here.
 from django.utils.timezone import now
 
 from mysite.base.forms import AlunoForm
@@ -54,13 +54,21 @@ def perguntas(request, indice: int):
                             Resposta.objects.filter(pergunta=pergunta).order_by('criacao')[0].criacao
                         )
                     except IndexError:
-                        Resposta(aluno_id=aluno_id, pergunta=pergunta, pontos=PONTUACAO_MAXIMA).save()
+                        pontos = PONTUACAO_MAXIMA
                     else:
                         diferenca = now() - data_da_primeira_resposta
                         diferenca_em_segundos = int(diferenca.total_seconds())
                         pontos = max(PONTUACAO_MAXIMA - diferenca_em_segundos, 10)
-                        Resposta(aluno_id=aluno_id, pergunta=pergunta, pontos=pontos).save()
+
+                    try:
+                        Resposta.objects.create(aluno_id=aluno_id, pergunta=pergunta, pontos=pontos)
+                    except IntegrityError:
+                        messages.error(request, 'Resposta já existe para este aluno e pergunta.')
+                        return redirect(f'/perguntas/{indice}')
+
                     return redirect(f'/perguntas/{indice + 1}')
+
+                # Caso a resposta esteja incorreta
                 contexto['resposta_correta'] = resposta_indice
             return render(request, 'base/perguntas.html', contexto)
 

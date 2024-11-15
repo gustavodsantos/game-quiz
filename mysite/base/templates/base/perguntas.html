@@ -10,7 +10,7 @@
 
             <div id="game" class="justify-center flex-column animate-bottom hidden">
 
-                <h2>Questão {{ indice_da_questao  }}</h2>
+                <h2>Questão {{ indice_da_questao }}</h2>
                 <h3>{{ pergunta.enunciado }}</h3>
 
                 {% for alternativa in pergunta.alternativas.array %}
@@ -19,15 +19,24 @@
                             {% csrf_token %}
                             <input type="hidden" name="resposta_indice" value="{{ forloop.counter0 }}"/>
                             <button type="submit" class="choice-prefix">{% cycle 'A' 'B' 'C' 'D' %}</button>
-                            <button type="submit" class="choice-text{% if resposta_indice == forloop.counter0 %} incorrect {% endif %}">{{ alternativa }}</button>
+                            <button type="submit"
+                                    class="choice-text{% if resposta_indice == forloop.counter0 %} incorrect {% endif %}">{{ alternativa }}</button>
                         </div>
                     </form>
                 {% endfor %}
+
+                {% if messages %}
+                    <div class="choice-container">
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li class="{{ message.tags }}">{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
 
             </div>
 
         </div>
     </div>
 {% endblock body %}
-
-{#<script src="{% static 'base/js/script.js' %}"></script>#}
