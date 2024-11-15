@@ -7,14 +7,14 @@ def tornar_disponivel(modeladmin, request, queryset):
     queryset.update(disponivel=True)
 
 
-tornar_disponivel.short_description = "Tornar Disponivel"
+tornar_disponivel.short_description = 'Tornar Disponivel'
 
 
 def tornar_indisponivel(modeladmin, request, queryset):
     queryset.update(disponivel=False)
 
 
-tornar_indisponivel.short_description = "Tornar Indisponivel"
+tornar_indisponivel.short_description = 'Tornar Indisponivel'
 
 
 @admin.register(Pergunta)

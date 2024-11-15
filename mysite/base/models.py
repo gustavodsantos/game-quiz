@@ -5,12 +5,7 @@ from django.db import models
 
 class Pergunta(models.Model):
     enunciado = models.TextField()
-    alternativa_correta = models.IntegerField(choices=[
-        (0, 'A'),
-        (1, 'B'),
-        (2, 'C'),
-        (3, 'D')
-    ])
+    alternativa_correta = models.IntegerField(choices=[(0, 'A'), (1, 'B'), (2, 'C'), (3, 'D')])
     alternativas = models.JSONField()
     disponivel = models.BooleanField(default=False)
 
@@ -38,6 +33,4 @@ class Resposta(models.Model):
     pergunta = models.ForeignKey(Pergunta, on_delete=models.CASCADE)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['aluno', 'pergunta'], name='resposta_unica')
-        ]
+        constraints = [models.UniqueConstraint(fields=['aluno', 'pergunta'], name='resposta_unica')]

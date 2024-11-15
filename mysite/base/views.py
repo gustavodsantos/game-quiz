@@ -1,5 +1,3 @@
-
-from django.db import IntegrityError
 from django.db.models import Sum
 from django.shortcuts import redirect, render
 
@@ -12,55 +10,59 @@ from mysite.base.models import Aluno, Pergunta, Resposta
 
 def home(request):
     if request.method == 'POST':
-        email = email = request.POST['email']
-        if Aluno.objects.filter(email=email):
+        # Usuário já existe
+        email = request.POST['email']
+        try:
             aluno = Aluno.objects.get(email=email)
-            request.session['aluno_id'] = aluno.id
-            return redirect('/perguntas/1')
-        # Salvando o aluno
-        form = AlunoForm(request.POST)
-        if form.is_valid():
-            aluno = form.save()
-            request.session['aluno_id'] = aluno.id
-            return redirect('/perguntas/1')
+        except Aluno.DoesNotExist:
+            # Usuário não existe
+            form = AlunoForm(request.POST)
+            if form.is_valid():
+                aluno = form.save()
+                request.session['aluno_id'] = aluno.id
+                return redirect('/perguntas/1')
+            else:
+                contexto = {'form': form}
+                return render(request, 'base/home.html', contexto)
         else:
-            contexto = {'form': form}
-            return render(request, 'base/home.html', contexto)
-
+            request.session['aluno_id'] = aluno.id
+            return redirect('/perguntas/1')
     return render(request, 'base/home.html')
 
 
-def perguntas(request, indice: int):
-    if 'aluno_id' not in request.session:
-        return redirect('/')
-    aluno_id = request.session['aluno_id']
-    try:
-        pergunta = Pergunta.objects.filter(disponivel=True).order_by('id')[indice - 1]
-    except IndexError:
-        return redirect('/classificacao')
-    if request.method == 'POST':
-        resposta_indice = int(request.POST['resposta_indice'])
-        resposta_correta = pergunta.conferir_resposta(resposta_indice)
-        if resposta_correta:
-            try:
-                resposta = Resposta.objects.filter(pergunta=pergunta).order_by('criacao')[0]
-            except IndexError:
-                pontos = 100
-            else:
-                tempo_primeira_resposta = resposta.criacao
-                diferenca = now() - tempo_primeira_resposta
-                pontos = max(100 - int(diferenca.total_seconds()), 0)
-            try:
-                Resposta.objects.create(pontos=pontos, aluno_id=aluno_id, pergunta=pergunta)
-            except IntegrityError:
-                pass
-            return redirect(f'/perguntas/{indice + 1}')
+PONTUACAO_MAXIMA = 1000
 
-        else:
-            contexto = {'indice': indice, 'pergunta': pergunta, 'resposta_indice': resposta_indice}
+
+def perguntas(request, indice: int):
+    try:
+        aluno_id = request.session['aluno_id']
+    except KeyError:
+        return redirect('/')
     else:
-        contexto = {'indice': indice, 'pergunta': pergunta}
-    return render(request, 'base/perguntas.html', contexto)
+        try:
+            pergunta = Pergunta.objects.filter(disponivel=True).order_by('id')[indice - 1]
+        except IndexError:
+            return redirect('/classificacao')
+        else:
+            contexto = {'indice_da_questao': indice, 'pergunta': pergunta}
+            if request.method == 'POST':
+                resposta_indice = int(request.POST['resposta_indice'])
+                if resposta_indice == pergunta.alternativa_correta:
+                    # Armazenar dados da resposta
+                    try:
+                        data_da_primeira_resposta = (
+                            Resposta.objects.filter(pergunta=pergunta).order_by('criacao')[0].criacao
+                        )
+                    except IndexError:
+                        Resposta(aluno_id=aluno_id, pergunta=pergunta, pontos=PONTUACAO_MAXIMA).save()
+                    else:
+                        diferenca = now() - data_da_primeira_resposta
+                        diferenca_em_segundos = int(diferenca.total_seconds())
+                        pontos = max(PONTUACAO_MAXIMA - diferenca_em_segundos, 10)
+                        Resposta(aluno_id=aluno_id, pergunta=pergunta, pontos=pontos).save()
+                    return redirect(f'/perguntas/{indice + 1}')
+                contexto['resposta_correta'] = resposta_indice
+            return render(request, 'base/perguntas.html', contexto)
 
 
 def classificacao(request):
@@ -71,14 +73,15 @@ def classificacao(request):
     pontos_do_aluno = pontos_dct['pontos__sum']
     if pontos_do_aluno is None:
         pontos_do_aluno = 0
-    alunos_com_mais_pontos = Resposta.objects.values('aluno').annotate(Sum('pontos')).filter(
-        pontos__sum__gt=pontos_do_aluno).count()
+    alunos_com_mais_pontos = (
+        Resposta.objects.values('aluno').annotate(Sum('pontos')).filter(pontos__sum__gt=pontos_do_aluno).count()
+    )
     primeiros_alunos_do_ranking = list(
         Resposta.objects.values('aluno', 'aluno__nome').annotate(Sum('pontos')).order_by('-pontos__sum')[:5]
     )
     contexto = {
         'pontos': pontos_do_aluno,
         'posicao': alunos_com_mais_pontos + 1,
-        'primeiros_alunos_do_ranking': primeiros_alunos_do_ranking
+        'primeiros_alunos_do_ranking': primeiros_alunos_do_ranking,
     }
     return render(request, 'base/classificacao.html', contexto)
