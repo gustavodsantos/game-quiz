@@ -10,16 +10,16 @@
 
             <div id="game" class="justify-center flex-column animate-bottom hidden">
 
-                <h2>Questão {{ indice }}</h2>
+                <h2>Questão {{ indice_da_questao  }}</h2>
                 <h3>{{ pergunta.enunciado }}</h3>
 
                 {% for alternativa in pergunta.alternativas.array %}
-                    <form method="post" action="/perguntas/{{ indice }}">
+                    <form method="post" action="/perguntas/{{ indice_da_questao }}">
                         <div class="choice-container">
                             {% csrf_token %}
-                            <input type="hidden" name="resposta_indice" value="{% cycle 0 1 2 3 %}"/>
+                            <input type="hidden" name="resposta_indice" value="{{ forloop.counter0 }}"/>
                             <button type="submit" class="choice-prefix">{% cycle 'A' 'B' 'C' 'D' %}</button>
-                            <button class="choice-text{% if forloop.counter0 == resposta_indice %} incorrect{% endif %}">{{ alternativa }}</button>
+                            <button type="submit" class="choice-text{% if resposta_indice == forloop.counter0 %} incorrect {% endif %}">{{ alternativa }}</button>
                         </div>
                     </form>
                 {% endfor %}
