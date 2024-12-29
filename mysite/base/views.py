@@ -1,12 +1,10 @@
-from django.contrib import messages
-from django.db import IntegrityError
-from django.db.models import Sum
-from django.shortcuts import redirect, render
-from django.utils.timezone import now
+import random
 
-from mysite.base.constants import NIVEL_DIFICULDADE, PONTUACAO_MAXIMA, PONTUACAO_MINIMA
+from django.contrib import messages
+from django.shortcuts import redirect, render
+
 from mysite.base.forms import AlunoForm
-from mysite.base.models import Aluno, Pergunta, Resposta
+from mysite.base.models import Aluno, Partida, Pergunta, Resposta
 
 
 def home(request):
@@ -15,68 +13,78 @@ def home(request):
         try:
             aluno = Aluno.objects.get(email=email)
         except Aluno.DoesNotExist:
-            # Caso o aluno não exista, criar um novo a partir do formulário
             form = AlunoForm(request.POST)
             if form.is_valid():
                 aluno = form.save()
                 request.session['aluno_id'] = aluno.id
-                return redirect('/perguntas/1')
             else:
                 return render(request, 'base/home.html', {'form': form})
 
-        # Caso o aluno já exista, armazenar o ID na sessão e redirecionar
         request.session['aluno_id'] = aluno.id
+
+        # Criar uma nova partida para o aluno
+        partida = Partida.objects.create(aluno=aluno)
+        request.session['partida_id'] = partida.id
+
+        # Selecionar perguntas para a partida
+        try:
+            perguntas = selecionar_perguntas()
+            request.session['perguntas_ids'] = [p.id for p in perguntas]
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect('/')
+
+        # Redirecionar para a primeira pergunta
         return redirect('/perguntas/1')
 
-    # Retornar o formulário inicial ao carregar a página
     return render(request, 'base/home.html', {'form': AlunoForm()})
 
 
 def perguntas(request, indice: int):
     aluno_id = request.session.get('aluno_id')
-    if not aluno_id:
+    partida_id = request.session.get('partida_id')
+    perguntas_ids = request.session.get('perguntas_ids', [])
+
+    if not aluno_id or not partida_id or not perguntas_ids:
         return redirect('/')
 
-    # Recuperar as perguntas disponíveis
-    perguntas_disponiveis = Pergunta.objects.filter(disponivel=True).order_by('id')
+    aluno = Aluno.objects.filter(id=aluno_id).first()
+    partida = Partida.objects.filter(id=partida_id, finalizada=False).first()
+
+    if not aluno or not partida:
+        return redirect('/')
+
     try:
-        pergunta = perguntas_disponiveis[indice - 1]
-    except IndexError:
+        pergunta_id = perguntas_ids[indice - 1]
+        pergunta = Pergunta.objects.get(id=pergunta_id)
+    except (IndexError, Pergunta.DoesNotExist):
+        partida.finalizada = True
+        partida.save()
         return redirect('/classificacao')
 
-    # Contexto inicial para a renderização
-    context = {
-        'indice_da_questao': indice,
-        'pergunta': pergunta,
-        'dificuldade_da_pergunta': pergunta.dificuldade,
-    }
-
     if request.method == 'POST':
-        resposta_indice = int(request.POST.get('resposta_indice', -1))  # Define -1 para casos de falha
-        if resposta_indice == pergunta.alternativa_correta:
-            # Calcula pontuação baseada no tempo da primeira resposta
-            try:
-                data_primeira_resposta = Resposta.objects.filter(pergunta=pergunta).earliest('criacao').criacao
-                segundos_passados = max(int((now() - data_primeira_resposta).total_seconds()), 0)
-                pontos_base = max(PONTUACAO_MAXIMA - segundos_passados, PONTUACAO_MINIMA)
-            except Resposta.DoesNotExist:
-                pontos_base = PONTUACAO_MAXIMA  # Primeira resposta recebe a pontuação máxima
+        resposta_indice = int(request.POST.get('resposta_indice', -1))
 
-            dificuldade = pergunta.dificuldade
-            pontos = pontos_base * NIVEL_DIFICULDADE.get(dificuldade, 1)
+        # Adiciona a verificação de resposta duplicada para esta pergunta
+        try:
+            _, pontos = Resposta.registrar_resposta(aluno, pergunta, partida, resposta_indice)
+            messages.success(request, f'Você ganhou {pontos} pontos!')
+        except Exception:
+            # Exibe mensagem de erro caso tente violar a unicidade
+            messages.error(request, 'Erro ao registrar a resposta. Você já respondeu a essa pergunta.')
 
-            try:
-                Resposta.objects.create(aluno_id=aluno_id, pergunta=pergunta, pontos=pontos)
-            except IntegrityError:
-                messages.error(request, 'Você já respondeu a esta pergunta! Por favor, continue.')
-                return redirect(f'/perguntas/{indice}')
-
-            return redirect(f'/perguntas/{indice + 1}')
-
-        # Caso a resposta esteja errada
+        # Redireciona para a próxima pergunta
         return redirect(f'/perguntas/{indice + 1}')
 
-    return render(request, 'base/perguntas.html', context)
+    return render(
+        request,
+        'base/perguntas.html',
+        {
+            'indice_da_questao': indice,
+            'pergunta': pergunta,
+            'aluno_nome': aluno.nome,
+        },
+    )
 
 
 def classificacao(request):
@@ -84,31 +92,51 @@ def classificacao(request):
     if not aluno_id:
         return redirect('/')
 
-    # Pontuação total do aluno atual
-    pontos_dct = Resposta.objects.filter(aluno_id=aluno_id).aggregate(total_pontos=Sum('pontos'))
-    pontos_do_aluno = pontos_dct.get('total_pontos') or 0
+    aluno = Aluno.objects.get(id=aluno_id)
 
-    # Cálculo da posição do aluno
-    alunos_com_mais_pontos = (
-        Resposta.objects.values('aluno')
-        .annotate(total_pontos=Sum('pontos'))
-        .filter(total_pontos__gt=pontos_do_aluno)
-        .count()
-    )
+    # Atualizar pontuação total do aluno (se necessário)
+    aluno.atualizar_pontuacao_maxima()
 
-    # Recuperar os primeiros 10 alunos em ordem decrescente de pontos
-    primeiros_alunos_do_ranking = (
-        Resposta.objects.values('aluno_id', 'aluno__nome')
-        .annotate(total_pontos=Sum('pontos'))
-        .order_by('-total_pontos')[:10]
-    )
+    # Obter todos os alunos ordenados por pontuação máxima
+    ranking_completo = Aluno.objects.order_by('-pontuacao_maxima')
 
-    # Construir o contexto para o template do ranking
+    # Calcular a posição do aluno no ranking
+    posicao = None
+    for indice, aluno_atual in enumerate(ranking_completo, start=1):
+        if aluno_atual.id == aluno.id:
+            posicao = indice
+            break
+
+    # Obter os 10 melhores para exibição no ranking
+    melhores_alunos = ranking_completo[:10]
+
     context = {
-        'pontos': pontos_do_aluno,
-        'posicao': alunos_com_mais_pontos + 1,
-        'primeiros_alunos_do_ranking': primeiros_alunos_do_ranking,
-        'ranking_total': Resposta.objects.aggregate(total_pontos=Sum('pontos')).get('total_pontos', 0),
+        'pontos': aluno.pontuacao_maxima,
+        'posicao': posicao,
+        'primeiros_alunos_do_ranking': melhores_alunos,
     }
 
     return render(request, 'base/classificacao.html', context)
+
+
+def selecionar_perguntas():
+    perguntas = {
+        'facil': Pergunta.objects.filter(dificuldade='facil', disponivel=True),
+        'medio': Pergunta.objects.filter(dificuldade='medio', disponivel=True),
+        'dificil': Pergunta.objects.filter(dificuldade='dificil', disponivel=True),
+        'especialista': Pergunta.objects.filter(dificuldade='especialista', disponivel=True),
+    }
+
+    selecionadas = []
+    try:
+        # Seleciona questões de cada nível
+        selecionadas.extend(random.sample(list(perguntas['facil']), min(2, perguntas['facil'].count())))
+        selecionadas.extend(random.sample(list(perguntas['medio']), min(2, perguntas['medio'].count())))
+        selecionadas.extend(random.sample(list(perguntas['dificil']), min(3, perguntas['dificil'].count())))
+        selecionadas.extend(random.sample(list(perguntas['especialista']), min(3, perguntas['especialista'].count())))
+    except ValueError:
+        raise ValueError('Não há perguntas suficientes disponíveis em um ou mais níveis de dificuldade.')
+
+    # Embaralha a lista de perguntas antes de retornar
+    random.shuffle(selecionadas)
+    return selecionadas

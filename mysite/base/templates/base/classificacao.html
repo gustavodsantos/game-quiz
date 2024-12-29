@@ -35,8 +35,8 @@
                         {% for aluno in primeiros_alunos_do_ranking %}
                         <tr class="ranking-row">
                             <td class="ranking-points">{{ forloop.counter }}º</td>
-                            <td class="ranking-points">{{ aluno.aluno__nome }}</td>
-                            <td class="ranking-points">{{ aluno.total_pontos }} pontos</td>
+                            <td class="ranking-points">{{ aluno.nome }}</td>
+                            <td class="ranking-points">{{ aluno.pontuacao_maxima }} pontos</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -46,7 +46,7 @@
 
                 <!-- Informação adicional sobre o ranking -->
                 <p class="ranking-note accessibility-note">
-                    <strong>Nota:</strong> A pontuação é calculada com base no número de acertos e no tempo para responder as perguntas.
+                    <strong>Nota:</strong> A pontuação é calculada com base no número de acertos.
                 </p>
             </div>
         </div> <!-- End container -->

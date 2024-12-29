@@ -1,60 +1,44 @@
 {% extends 'base/base.html' %}
+
 {% block body %}
-    <div class="game-page">
-        <p class="subtitle-quiz">Quiz</p>
-        <p class="subtitle-page">Gustavo</p>
+<div class="game-page">
+    <p class="subtitle-quiz">Quiz</p>
+    <p class="subtitle-page">Bem-vindo(a), {{ aluno_nome }}</p> <!-- Substitua `aluno_nome` se necessário -->
 
-        <div class="container">
+    <div class="container">
 
-            <div id="loader"></div>
-
-            <div id="game" class="justify-center flex-column animate-bottom hidden">
-
-                <!-- Exibe o índice e o enunciado da questão -->
-                <h2>Questão {{ indice_da_questao }}</h2>
-                <h3>{{ pergunta.enunciado }}</h3>
-
-                <!-- Exibe a dificuldade da questão -->
-                <p class="question-difficulty">
-                    <strong>Dificuldade:</strong> {{ pergunta.dificuldade|title }}
-                </p>
-                <small class="difficulty-note">
-                    <em>Questões de maior dificuldade oferecem mais pontos!</em>
-                </small>
+        <!-- Exibe as informações da questão -->
+        <div id="game" class="justify-center flex-column animate-bottom">
+            <!-- Questão atual -->
+            <h2>Questão {{ indice_da_questao }}/10</h2>
+            <h3>{{ pergunta.enunciado|linebreaksbr }}</h3>
 
                 {% for alternativa in pergunta.alternativas %}
-                    <!-- Formulário para envio da alternativa -->
+                    <!-- Alternativas -->
                     <form method="post" action="/perguntas/{{ indice_da_questao }}">
                         <div class="choice-container">
                             {% csrf_token %}
-                            <input type="hidden" name="resposta_indice" value="{{ forloop.counter0 }}"/>
+                            <input type="hidden" id="choice-{{ forloop.counter }}" name="resposta_indice"
+                                   value="{{ forloop.counter0 }}" required>
+                            <label for="choice-{{ forloop.counter }}"></label>
                             <button type="submit" class="choice-prefix">{% cycle 'A' 'B' 'C' 'D' %}</button>
-                            <button type="submit"
-                                    class="choice-text{% if resposta_indice == forloop.counter0 %} incorrect {% endif %}">{{ alternativa }}</button>
+                            <button type="submit" class="choice-text{% if resposta_indice == forloop.counter0 %} incorrect {% endif %}">{{ alternativa }}</button>
                         </div>
                     </form>
                 {% endfor %}
 
-                <!-- Mensagens de erro ou avisos -->
-                {% if messages %}
-                    <div class="choice-container">
-                        <ul class="messages">
-                            {% for message in messages %}
-                                <li><a href="/">{{ message }}</a></li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-
-                <!-- Feedback caso a resposta esteja errada -->
-                {% if resposta_correta is not None %}
-                    <p class="feedback incorrect">
-                        <strong>Resposta incorreta.</strong> Por favor, tente outra ou continue para a próxima questão!
-                    </p>
-                {% endif %}
-
-            </div>
+            <!-- Mensagens de erro ou avisos -->
+            {% if messages %}
+                <div class="messages">
+                    <ul>
+                        {% for message in messages %}
+                            <li class="error-message">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
 
         </div>
     </div>
+</div>
 {% endblock body %}
