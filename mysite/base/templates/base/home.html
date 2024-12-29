@@ -14,9 +14,15 @@
 
             <form class="login-form" method="post" action="/">
                 {% csrf_token %}
-                <input type="text" name="nome" placeholder="NOME" required="required" value="{{ form.nome.value }}"/>
-                <input type="email" name="email" placeholder="EMAIL" required="required"
+
+                <label for="id_nome"></label>
+                <input id="id_nome" type="text" name="nome" placeholder="NOME" required="required"
+                       value="{{ form.nome.value }}"/>
+
+                <label for="id_email"></label>
+                <input id="id_email" type="email" name="email" placeholder="EMAIL" required="required"
                        value="{{ form.email.value }}"/>
+
                 <button type="submit">Entrar</button>
             </form>
 

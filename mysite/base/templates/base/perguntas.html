@@ -10,10 +10,20 @@
 
             <div id="game" class="justify-center flex-column animate-bottom hidden">
 
+                <!-- Exibe o índice e o enunciado da questão -->
                 <h2>Questão {{ indice_da_questao }}</h2>
                 <h3>{{ pergunta.enunciado }}</h3>
 
-                {% for alternativa in pergunta.alternativas.array %}
+                <!-- Exibe a dificuldade da questão -->
+                <p class="question-difficulty">
+                    <strong>Dificuldade:</strong> {{ pergunta.dificuldade|title }}
+                </p>
+                <small class="difficulty-note">
+                    <em>Questões de maior dificuldade oferecem mais pontos!</em>
+                </small>
+
+                {% for alternativa in pergunta.alternativas %}
+                    <!-- Formulário para envio da alternativa -->
                     <form method="post" action="/perguntas/{{ indice_da_questao }}">
                         <div class="choice-container">
                             {% csrf_token %}
@@ -25,15 +35,22 @@
                     </form>
                 {% endfor %}
 
+                <!-- Mensagens de erro ou avisos -->
                 {% if messages %}
                     <div class="choice-container">
                         <ul class="messages">
                             {% for message in messages %}
                                 <li><a href="/">{{ message }}</a></li>
                             {% endfor %}
-
                         </ul>
                     </div>
+                {% endif %}
+
+                <!-- Feedback caso a resposta esteja errada -->
+                {% if resposta_correta is not None %}
+                    <p class="feedback incorrect">
+                        <strong>Resposta incorreta.</strong> Por favor, tente outra ou continue para a próxima questão!
+                    </p>
                 {% endif %}
 
             </div>
