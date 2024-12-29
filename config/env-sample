@@ -1,13 +1,28 @@
 # AVISO DE SEGURANÇA: não execute modo Debug=True em produção!
 DEBUG=False
 SECRET_KEY=escolha-um-segredo-como-valor-para-o-django
+LANGUAGE_CODE=pt-br
+TIME_ZONE=America/Sao_Paulo
+
+POSTGRES_DB=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+
+GUNICORN_RELOAD=
 
 # Configure os dominios ou ips que sua aplicação vai rodar, separadas por vírgula
-ALLOWED_HOSTS=localhost,127.0.0.1
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
+ALLOWED_HOSTS=
+
+DOMAIN_NAME=
+
+## 🖥️  Para uso local via virtualenv
+# DATABASE_URL=postgres://postgres:postgres@localhost:15432/postgres
+
+## 🐳 Para uso via container/Docker
+DATABASE_URL=postgres://postgres:postgres@database:5432/postgres
 
 # Configurações do AWS
 ## Se a variável não for definida, será usado Nginx para servir estatícos. Caso contrário, o S3.
 AWS_STORAGE_BUCKET_NAME=
-AWS_S3_ACCESS_KEY_ID=your-iam-s3-access-key-id
-AWS_S3_SECRET_ACCESS_KEY=your-iam-s3-access-key-secret
+AWS_S3_ACCESS_KEY_ID=
+AWS_S3_SECRET_ACCESS_KEY=

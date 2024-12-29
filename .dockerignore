@@ -1,0 +1,33 @@
+# Ignorar arquivos de configuração do sistema
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# Ignorar arquivos e pastas de logs
+logs
+*.log
+
+# Ignorar diretórios de dados do banco de dados
+docker/.pgdata
+dbdata
+
+# Ignorar dependências e ambientes virtuais
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignorar arquivos e pastas de controle de versão
+.git/
+.gitignore
+.idea/
+.vscode/
+.venv/
+
+# Ignorar arquivos de compilação ou de cache
+*.egg-info
+*.pytest_cache
+*.coverage
+*.env
+*.bak
