@@ -19,7 +19,9 @@ tornar_indisponivel.short_description = 'Tornar Indisponivel'
 
 @admin.register(Pergunta)
 class PerguntaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'enunciado', 'disponivel')
+    list_display = ('id', 'enunciado', 'dificuldade', 'disponivel')
+    list_filter = ('dificuldade', 'disponivel')
+    search_fields = ('enunciado',)
     actions = [tornar_disponivel, tornar_indisponivel]
 
 

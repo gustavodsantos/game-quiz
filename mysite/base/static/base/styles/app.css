@@ -1,12 +1,21 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:300,600,900);
 
-:root{
-    background-color: #1D2241;
-    height: -webkit-fill-available;
-    font-size: 62.5%;
+:root {
+    --primary-color: #1D2241;
+    --secondary-color: #30386b;
+    --font-size-base: 62.5%;
+    --background-gradient: linear-gradient(to left, var(--primary-color), var(--secondary-color));
+    --btn-hover-shadow: 0 0.6rem 2rem rgba(48, 56, 107, 0.5);
+    --light-color: #FFF;
+    --error-color: #e53935;
+    --success-color: #4caf50;
+
+    background-color: var(--primary-color);
+    height: 100%;
+    font-size: var(--font-size-base);
 }
 
-*{
+* {
     box-sizing: border-box;
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
@@ -15,39 +24,36 @@
 }
 
 body {
-    background-color: #1D2241;
-    background: -webkit-linear-gradient(right, #1D2241, #30386b);
-    background: -moz-linear-gradient(right, #1D2241, #30386b);
-    background: -o-linear-gradient(right, #1D2241, #30386b);
-    background: linear-gradient(to left, #1D2241, #30386b);
+    background: var(--background-gradient);
     background-image: url("../img/img-bg.jpg");
-    transition: background 0.3s, border-radius 0.3s, opacity 0.3s;
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
-    font-family: "Roboto", sans-serif;
+    transition: background 0.3s, border-radius 0.3s, opacity 0.3s;
+    font-family: 'Roboto', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     height: 100%;
 }
 
-h1, h2, h3, h4{
+h1, h2, h3, h4 {
     margin-bottom: 1rem;
-    color: #1D2241;
+    color: var(--primary-color);
 }
 
-h1{
-    font-size: 5.4rem;
-    margin-bottom: 5rem;
+h1 {
+    font-size: 4.8rem;
+    margin-bottom: 4rem;
+    text-shadow: 2px 2px 5px #000;
 }
 
-h2{
+h2 {
     font-size: 4.2rem;
     margin-bottom: 1rem;
     font-weight: 700;
 }
 
-h3{
+h3 {
     font-size: 2.8rem;
     font-weight: 500;
     margin-bottom: 2rem;
@@ -55,6 +61,11 @@ h3{
 
 a {
     text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--secondary-color);
 }
 
 li {
@@ -63,8 +74,74 @@ li {
 
 /* Util - Base */
 
-.container{
-    background: #FFF;
+.question-difficulty {
+    font-size: 1.2rem;
+    color: var(--success-color); /* Verde para dificuldade */
+}
+
+.difficulty-note {
+    font-size: 0.85rem;
+    color: var(--secondary-color); /* Azul para nota */
+}
+
+.feedback.incorrect {
+    font-size: 1rem;
+    color: var(--error-color); /* Vermelho para respostas erradas */
+    margin-top: 15px;
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.ranking-table th,
+.ranking-table td {
+    text-align: center;
+    padding: 15px;
+    border: 1px solid var(--primary-color);
+}
+
+.ranking-table th {
+    background-color: var(--secondary-color);
+    color: var(--light-color);
+    font-size: 1.6rem;
+}
+
+.ranking-note {
+    font-size: 0.9rem;
+    margin-top: 15px;
+    color: #555;
+}
+
+.ranking-body {
+    background-color: var(--light-color);
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.ranking-row {
+    border-bottom: 1px solid var(--primary-color);
+    transition: background 0.3s ease;
+
+}
+
+.ranking-points {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.ranking-title {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.container {
+    background: var(--light-color);
     width: 100%;
     height: auto;
     display: flex;
@@ -76,120 +153,123 @@ li {
     border-radius: 2px;
 }
 
-.container > *{
+.container > * {
     width: 100%;
 }
 
-.flex-column{
+.flex-column {
     display: flex;
     flex-direction: column;
 }
 
-.flex-center{
+.flex-center {
     justify-content: center;
     align-items: center;
 }
 
-.justify-center{
+.justify-center {
     justify-content: center;
 }
 
-.text-center{
+.text-center {
     text-align: center;
 }
 
-.hidden{
+.hidden {
     display: none;
 }
 
+/* Página - Game */
 
-/*Página - Game*/
 .game-page {
     padding: 2% 4%;
 }
+
 .subtitle-page-game {
-    color: #1D2241;
-    font-size: 70px;
-    font-weight:  900;
+    color: var(--primary-color);
+    font-size: 4.6rem;
+    font-weight: 900;
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 4rem;
 }
 
-.choice-container{
+.choice-container {
     display: flex;
     margin-bottom: 0.5rem;
     width: 100%;
     font-size: 1.8rem;
-    border: 0.1rem solid rgb(86, 165, 235, 0.25);
-    background-color: #FFF;
-    border-radius: 0 4px 4px 0
+    border: 0.1rem solid rgba(86, 165, 235, 0.25);
+    background-color: var(--light-color);
+    border-radius: 0 4px 4px 0;
+    transition: transform 150ms, box-shadow 150ms;
 }
 
-.choice-container:hover{
+.choice-container:hover {
     cursor: pointer;
-    box-shadow: 0 0.4rem 1.4rem;
-    transform: translate(-0.1rem);
-    transition: transform 150ms;
+    box-shadow: 0 0.4rem 1.4rem rgba(0, 0, 0, 0.25);
+    transform: scale(1.02);
 }
 
-.choice-prefix{
+.choice-prefix {
     padding: 1.5rem 2.5rem;
-    background-color: #1D2241;
-    color: #FFF;
+    background-color: var(--primary-color);
+    color: var(--light-color);
     border-radius: 4px 0 0 4px;
 }
 
-.choice-text{
+.choice-text {
     padding: 1.5rem;
     width: 100%;
 }
 
-.correct{
-    color: #FFF;
-    background-color: #28a745;
+.correct {
+    color: var(--light-color);
+    background-color: var(--success-color);
 }
 
-.incorrect{
-    color: #FFF;
-    background-color: #dc3545;
+.incorrect {
+    color: var(--light-color);
+    background-color: var(--error-color);
 }
 
-#hud{
+#hud {
     display: flex;
     justify-content: space-around;
 }
 
-.hud-prefix{
+.hud-prefix {
     text-align: center;
     font-size: 2rem;
 }
 
-.hud-main-text{
+.hud-main-text {
     text-align: center;
 }
 
-/*Buttons*/
+/* Buttons */
 
-.btn{
-    font-size: 1.8rem;
-    padding: 1rem 0;
+.btn {
+    font-size: 1.6rem;
+    padding: 0.8rem 0;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.1rem 0.5rem rgba(0, 0, 0, 0.1);
     width: 20rem;
     text-align: center;
     border: 0.1rem solid #56a5eb;
     margin-bottom: 1rem;
     text-decoration: none;
     color: #56a5eb;
-    background-color: white;
+    background-color: var(--light-color);
+    transition: transform 150ms, box-shadow 150ms;
 }
 
-.btn:hover{
+.btn:hover {
     cursor: pointer;
-    box-shadow: 0 0.4rem 1.4rem 0 rgba(86, 185, 235, 0.5);
-    transform: translate(-0.1rem);
-    transition: transform 150ms;
+    box-shadow: var(--btn-hover-shadow);
+    transform: scale(1.05);
 }
 
-.btn[disabled]:hover{
+.btn[disabled]:hover {
     cursor: not-allowed;
     box-shadow: none;
     transform: none;
@@ -203,17 +283,34 @@ form {
     flex-direction: column;
     align-items: center;
 }
+
 input {
     margin-bottom: 1rem;
     width: 20rem;
     padding: 1.5rem;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     border: none;
-    /*box-shadow: 0 0.1rem 1.4rem 0 rgba(86, 185, 235, 05);*/
+    border-radius: 5px;
+    background: #f2f2f2;
 }
 
 input::placeholder {
     color: #aaa;
+}
+
+input:focus {
+    border: 1px solid var(--secondary-color);
+}
+
+/* Loader */
+
+#loader {
+    border: 1.6rem solid var(--light-color);
+    border-radius: 50%;
+    border-top: 1.6rem solid var(--primary-color);
+    width: 12rem;
+    height: 12rem;
+    animation: spin 2s linear infinite;
 }
 
 /*Página - Login*/
@@ -221,18 +318,22 @@ input::placeholder {
   padding: 4% 0 0;
   margin: auto;
 }
+
 .login-page img {
   width: 100%;
 }
+
 .subtitle-quiz, .subtitle-page {
   color: #fff;
   font-size: 70px;
   font-weight:  900;
   text-align: center;
 }
+
 .subtitle-page {
     margin: -30px 0 10px 0;
 }
+
 .form {
   position: relative;
   z-index: 1;
@@ -275,8 +376,8 @@ input::placeholder {
   padding: 15px;
   color: #FFFFFF;
   font-size: 14px;
-  -webkit-transition: all 0.3 ease;
-  transition: all 0.3 ease;
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
   border-radius: 2px;
 }
@@ -289,6 +390,7 @@ input::placeholder {
   display: block;
   clear: both;
 }
+
 
 /*Página - Resultado do Jogo*/
 .game-result h2{
@@ -306,59 +408,67 @@ input::placeholder {
   margin: 0 auto;
 }
 
-/* Loader */
-#loader{
-    border:1.6rem solid #FFF;
-    border-radius: 50%;
-    border-top: 1.6rem solid #1D2241;
-    width: 12rem;
-    height: 12rem;
-    -webkit-animation: spin 2s linear infinite;
-    animation: spin 2s linear infinite;
-}
-
-@-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
-}
-
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
-/* Add animation to content */
-.animate-bottom {
-  position: relative;
-  -webkit-animation-name: animatebottom;
-  -webkit-animation-duration: 1s;
-  animation-name: animatebottom;
-  animation-duration: 1s
+/* Responsivo */
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .ranking-table th,
+    .ranking-table td {
+        font-size: 1.2rem;
+    }
+
+    body {
+        font-size: 50%;
+    }
+
+    .subtitle-quiz {
+        font-size: 4rem;
+    }
+
+    .subtitle-page {
+        font-size: 4rem;
+    }
+
+    .ranking-title {
+        font-size: 2.5rem;
+    }
+    .form {
+        max-width: 400px;
+    }
 }
 
-@-webkit-keyframes animatebottom {
-  from { bottom:0px; opacity:0 }
-  to { bottom:0px; opacity:1 }
-}
-
-@keyframes animatebottom {
-  from{ bottom:-0px; opacity:0 }
-  to{ bottom:0; opacity:1 }
-}
-
-/*Responsivo*/
 @media (max-width: 400px) {
+    .login-page {
+        width: 320px;
+    }
 
-  .login-page {
-    width: 320px;
-  }
+    .form {
+        max-width: 320px;
+    }
 
-  .form {
-    max-width: 320px;
-  }
+    .subtitle-quiz {
+        font-size: 3rem;
+    }
 
-  body {
-    height: auto;
-  }
+    .subtitle-page {
+        font-size: 3rem;
+    }
+
+    .ranking-title {
+        font-size: 2rem;
+    }
+
 
 }

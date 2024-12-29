@@ -1,34 +1,54 @@
 {% extends 'base/base.html' %}
 {% block body %}
-    <div class="game-page">
+    <div class="game-page responsive">
         <p class="subtitle-quiz">Quiz</p>
-        <p class="subtitle-page">Gustavo</p>
+        <p class="subtitle-page">Classificação Geral</p>
 
-        <div class="container">
+        <div class="container game-content">
 
-            <div id="loader"></div>
+            <div id="loader" class="loader-spinner"></div>
 
-            <div id="game" class="justify-center flex-column animate-bottom hidden">
+            <div id="game" class="game-wrapper justify-center flex-column animate-bottom hidden">
 
+                <!-- Resultado do jogador atual -->
                 <div class="game-result">
-                    <h2>Você fez {{ pontos }} pontos e está no</h2>
+                    <h2>Você fez {{ pontos }} pontos e está na</h2>
                     <h2 class="status-player">{{ posicao }}º</h2>
-                    <h2>lugar!</h2>
+                    <h2>posição!</h2>
                 </div>
 
-                <br/>
+                <hr class="divider"/>
 
-                <h3>Ranking</h3>
+                <!-- Ranking -->
+                <h3 class="ranking-title">Ranking</h3>
 
-                {% for aluno in primeiros_alunos_do_ranking %}
-                    <div class="choice-container">
-                        <p class="choice-prefix">{{ forloop.counter }}º</p>
-                        <p class="choice-text">{{ aluno.aluno__nome }} ({{ aluno.pontos__sum }} pontos)</p>
-                    </div>
-                {% endfor %}
+                <!-- Tabela do Ranking -->
+                <table class="ranking-table">
+                    <thead class="ranking-header">
+                        <tr>
+                            <th>Posição</th>
+                            <th>Nome</th>
+                            <th>Pontos</th>
+                        </tr>
+                    </thead>
+                    <tbody class="ranking-body">
+                        {% for aluno in primeiros_alunos_do_ranking %}
+                        <tr class="ranking-row">
+                            <td class="ranking-points">{{ forloop.counter }}º</td>
+                            <td class="ranking-points">{{ aluno.aluno__nome }}</td>
+                            <td class="ranking-points">{{ aluno.total_pontos }} pontos</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
+                <br class="spacing-break"/>
+
+                <!-- Informação adicional sobre o ranking -->
+                <p class="ranking-note accessibility-note">
+                    <strong>Nota:</strong> A pontuação é calculada com base no número de acertos e no tempo para responder as perguntas.
+                </p>
             </div>
-
-        </div>
+        </div> <!-- End container -->
     </div>
 {% endblock body %}
