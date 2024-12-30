@@ -16,11 +16,13 @@ services:
     depends_on:
       - database
     command: bash -c "
+      python manage.py migrate --noinput &&
       python manage.py collectstatic --noinput &&
-      gunicorn mysite.wsgi:application --bind 0.0.0.0:8000 ${GUNICORN_RELOAD}"
+      gunicorn mysite.wsgi:application --bind 0.0.0.0:8000 $${GUNICORN_RELOAD}"
     volumes:
-      - ./staticfiles/static:/docker/staticfiles/static
-      - ./mediafiles:/docker/mediafiles
+      - ../:/app
+      - ./staticfiles/static:/app/docker/staticfiles/static
+      - ./mediafiles:/app/docker/mediafiles
     restart: always
 
   nginx:
@@ -31,7 +33,7 @@ services:
       - ./mediafiles:/app/mediafiles
     ports:
       - "80:80"
-    command: /bin/sh -c "envsubst '\$DOMAIN_NAME' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+    command: /bin/sh -c "envsubst '${DOMAIN_NAME}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
     restart: always
     depends_on:
       - backend
